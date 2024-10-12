@@ -1,0 +1,76 @@
+## Project 1 - DGK, sc-RNA
+project_id <- "P-20191004-0001"
+s3_path <- paste0(project_id, "/")
+s3_subfolders <- c("scRNA")
+extensions <- c("/filtered_feature_bc_matrix.h5", "/metrics_summary.csv", 
+                "/clusters.csv", "/differential_expression.csv", "/web_summary.html")
+
+
+## Project 2 - Perturb-Seq
+project_id <- "P-20200929-0002"
+project_folder <- "10X_Data/Perturb-Seq_P-20200929-0002/"
+s3_path <- paste0(project_id, "/scRNA-Seq/")
+s3_subfolders <- c("CALU1Cas9_BioRep1_Lane1_Overload_gRNA", "CALU1Cas9_BioRep1_Lane2_Overload_gRNA",
+                   "CALU1Cas9_BioRep1_Lane5_NonOverload_gRNA", "CALU1Cas9_BioRep2_Lane3_Overload_gRNA",
+                   "CALU1Cas9_BioRep2_Lane4_Overload_gRNA")
+extensions <- c("csv", "h5", "html", "json", "gz")
+
+
+## Project 3 - Ana Lako's pilot human PBMC, sNuc and SC
+project_id <- "P-20200904-0003"
+project_folder <- "scRNA_P-20200904-0003_TM-Pilot/"
+s3_path <- paste0(project_id, "/scRNA-Seq/")
+s3_subfolders <- c("GEX/GRCh38-2020-A/A1", "GEX/GRCh38-2020-A/A2", "GEX/GRCh38-2020-A/A3", "GEX/GRCh38-2020-A/A4", 
+                   "GEX/GRCh38-2020-A/A5", "GEX/GRCh38-2020-A/A6", "GEX/GRCh38-2020-A/A7", "GEX/GRCh38-2020-A/A8", 
+                   "GEX/GRCh38-2020-A/A9", "GEX/GRCh38-2020-A/A10", "GEX/GRCh38-2020-A/A11",
+                   "GEX/GRCh38-2020-A/BLD_TS_1", "GEX/GRCh38-2020-A/BLD_TS_2", "GEX/GRCh38-2020-A/PCA_TS_1", "GEX/GRCh38-2020-A/PCA_TS_2",
+                   "D20_ER_1", "D20_ER_2", "D22_ER_1", "D22_ER_2", "NHV_EDTA", "NHV_HEP", "A12", "A13")
+extensions <- c("csv", "h5", "html", "json")
+
+
+## Project 4 - Ana Lako's pilot human PBMC, sNuc and SC
+project_id <- "P-20200904-0003"
+project_folder <- "scRNA_P-20200904-0003_TM-Pilot/"
+s3_path <- paste0(project_id, "/scRNA-Seq/")
+s3_subfolders <- c("GEX/GRCh38-2020-A/A1", "GEX/GRCh38-2020-A/A2", "GEX/GRCh38-2020-A/A3", "GEX/GRCh38-2020-A/A4", 
+                   "GEX/GRCh38-2020-A/A5", "GEX/GRCh38-2020-A/A6", "GEX/GRCh38-2020-A/A7", "GEX/GRCh38-2020-A/A8", 
+                   "GEX/GRCh38-2020-A/A9", "GEX/GRCh38-2020-A/A10", "GEX/GRCh38-2020-A/A11",
+                   "GEX/GRCh38-2020-A/BLD_TS_1", "GEX/GRCh38-2020-A/BLD_TS_2", "GEX/GRCh38-2020-A/PCA_TS_1", "GEX/GRCh38-2020-A/PCA_TS_2",
+                   "D20_ER_1", "D20_ER_2", "D22_ER_1", "D22_ER_2", "NHV_EDTA", "NHV_HEP", "A12", "A13")
+extensions <- c("csv", "h5", "html", "json")
+
+
+## Project 5 - UPenn pilot
+project_id <- "P-20201125-0001"
+project_folder <- "10X_Data/scRNA_P-20201125-0001_UPenn/"
+s3_path <- paste0(project_id, "/scRNA-Seq/GEX/GRCh38-2020-A/")
+s3_subfolders <- c("ETB_PluralEffusion_Patient1_Rep1", "ETB_PluralEffusion_Patient1_Rep2",
+"ETB_PluralEffusion_Patient2_Rep1", "ETB_PluralEffusion_Patient2_Rep2")
+extensions <- c("csv", "h5", "html", "json")
+
+## Project 6 - Perturb-Seq
+project_id <- "P-20210525-0002"
+project_folder <- "10X_Data/Perturb-Seq_P-20210525-0002/"
+s3_path <- paste0(project_id, "/scRNA-Seq/CITE-Seq/GRCh38-2020-A/")
+s3_subfolders <- c("ETB_CropSeq_A375_gRNA", "ETB_ETB1004_A375_gRNA", "ETB_ETB1005_A375_gRNA",
+"ETB_ETB1006_A375_gRNA", "ETB_ETB1007_A375_gRNA", "ETB_SigmaLV09_A375_gRNA",
+"ETB_SigmaLV10_A375_gRNA", "ETB_SigmaLV11_A375_gRNA", "ETB_SigmaLV12_A375_gRNA")
+extensions <- c("csv", "h5", "html", "json", "gz")
+
+
+## Project 7 - Syngeneic, SN, FF, late time point
+project_id <- "P-20210311-0005"
+project_folder <- "10X_ST_Data_2020/MouseCellLines_sNuc/"
+s3_path <- paste0(project_id, "/scRNA-Seq/GEX/mm10-2020-A/")
+s3_subfolders <- c("B16_m2_d16_snRNA", "B16_m3_d16_snRNA", "B16_m4_d16_snRNA", 
+                   "MC38_m6_d16_snRNA", "MC38_m6_run2_d16_snRNA", "MC38_m7_d16_snRNA", "MC38_m8_d16_snRNA", 
+                   "Mixed_m10_d16_snRNA", "Mixed_m10_run2_d16_snRNA", "Mixed_m11_d16_snRNA", "Mixed_m12_d16_snRNA")
+extensions <- c("csv", "h5", "html", "json")
+
+
+## Project 8 - Syngeneic, SN, FF, late time point
+project_id <- "P-20210513-0001"
+project_folder <- "10X_ST_Data_2020/MouseCellLines_sNuc/"
+s3_path <- paste0(project_id, "/scRNA-Seq/GEX/mm10-2020-A/")
+s3_subfolders <- c("MC38_m8_HighBSA_snRNA", "MC38_m8_LowBSA_snRNA", "Mixed_m10_HighBSA_snRNA", "Mixed_m10_LowBSA_snRNA")
+extensions <- c("csv", "h5", "html", "json")

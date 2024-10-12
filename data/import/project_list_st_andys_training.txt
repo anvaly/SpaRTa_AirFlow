@@ -1,0 +1,20 @@
+# Andy's Training Projects
+
+## Project 1 - MC38 Tumor, Mouse 6
+project_id <-"P-20220207-0001"
+project_folder <- "10X_ST_Data_2022/P-20211213-0006_MC38_tumor_m6/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c("MC38_m6_d16_s1_D", "MC38_m6_d16_s2_C",
+                   "MC38_m6_d16_s3_B", "MC38_m6_d16_s4_A"
+                   )
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+
+## Project 2 - PDAC, Oxford Pt 3 
+project_id <-"P-20220321-0002"
+project_folder <- "s3://XXXX"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <- c("Human_FFPE_PDAC_Mega_Pt3_ROI1_S11_A", "Human_FFPE_PDAC_Mega_Pt3_ROI2_S11_B",
+                   "Human_FFPE_PDAC_Mega_Pt3_ROI3_S11_C", "Human_FFPE_PDAC_Mega_Pt3_ROI4_S11_D"
+                   )
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")

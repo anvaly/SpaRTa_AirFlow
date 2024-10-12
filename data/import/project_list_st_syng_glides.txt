@@ -1,0 +1,10 @@
+## Project 1 - MC38 Tolerization Guide Capture Pilot
+project_id <-"P-20220406-0008"
+project_folder <- "10X_ST_Data_2022/guide_slides/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c("FF_MC38-SMART-sgNeg1_Cas9-GFP-HET_m12_s1_A_GEx", 
+                   "FF_MC38-SMART-sgNeg1_Cas9-GFP-HET_m14_s1_B_GEx",
+                   "FF_MC38-SMART-sgNeg1_Cas9-GFP-HET_m17_s1_C_GEx",
+                   "FF_MC38-SMART-sgNeg1_Cas9-GFP-HET_m18_s1_D_GEx"
+                   )
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")

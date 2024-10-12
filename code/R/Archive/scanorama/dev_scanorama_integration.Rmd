@@ -1,0 +1,216 @@
+---
+title: "Simplified Scanorama Integration"
+output:
+  html_document:
+    df_print: paged
+---
+
+If the conda environment can't be loaded, restart the RStudio session by pressing the red button in the top right.
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = '/repos/P02567_TBIO-3021_10X_pilot/')
+```
+
+
+```{r r_env}
+`%>%` <- magrittr::`%>%`
+getwd()
+library(reticulate)
+Sys.setenv("RETICULATE_PYTHON"="XXXX")
+
+use_condaenv("Scanorama",
+             "XXXX",
+             require = TRUE)
+source("./code/R/Utils/utils_10X_matrix.R")
+source("./code/R/Utils/utils_10X_signatures.R")
+source("./code/utils/utils_signatures.R")
+
+sc <- import("scanpy")
+```
+
+
+```{python py_env}
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import matplotlib.pyplot as plt
+import matplotlib
+import json as json
+from pathlib import Path, PurePath
+import scanorama
+import scanpy.external as sce
+
+sc.settings.verbosity = 1
+```
+
+
+```{r}
+input_path <- "XXXX"
+output_path <- "XXXX"
+output_figs <- "XXXX"
+meta_df <- readr::read_delim(paste0(input_path, "full_pdac_meta_data.txt"), delim = "\t")
+
+selected <-meta_df %>% dplyr::filter(Quality_Status == TRUE & Primary == TRUE & Protocol == "FFPE-probes" & !is.na(Slide))
+list_files <- selected$FullPath
+list_samples <- selected$Sample_Name
+n_samples <- dim(selected)[1]
+```
+
+
+
+```{python}
+adata = []
+for i, file in enumerate(r.list_files):
+    temp_data = sc.read_visium(file)
+    temp_data.obs["Library_ID"] = r.list_samples[i]
+    temp_data.var_names_make_unique()
+    adata.append(temp_data)
+```
+
+
+```{python}
+adata_con = adata[0]
+adata_con = adata_con.concatenate(adata[1:len(adata)], batch_key="Library_ID", uns_merge="unique", batch_categories=r.list_samples)
+adata_con
+```
+
+
+```{python}
+# for one_adata in adata:
+  # sc.pp.normalize_total(one_adata)
+  # sc.pp.log1p(one_adata)
+  # sc.pp.highly_variable_genes(one_adata, flavor="seurat", n_top_genes=2000, inplace=True)
+```
+
+```{python}
+sc.tl.pca(adata_con)
+```
+
+
+```{python}
+sc.external.pp.scanorama_integrate(adata_con, "Library_ID")
+```
+
+
+```{python}
+# scanorama.integrate_scanpy(adata, dimred = 50, knn = 10, sketch = True)
+```
+
+
+```{python}
+len(adata[0].obsm["X_scanorama"][0])
+```
+
+
+```{python}
+scanorama_int = [ad.obsm['X_scanorama'] for ad in adata]
+all_s = np.concatenate(scanorama_int)
+print(all_s.shape)
+```
+
+
+turn list of adata to concatenated adata
+```{python}
+adatas = adata[0].copy()
+adatas = adatas.concatenate(
+adata[1:r.n_samples],
+batch_key="Library_ID",
+uns_merge="unique",
+batch_categories=r.list_samples)
+```
+
+
+```{python}
+filename = r.output_path + "/pdac_primary_zheng-recipe_processed_scanorama.h5ad"
+adatas.write_h5ad(filename)
+"File created: " + filename
+```
+
+
+```{python}
+# filename = r.output_path + "/pdac_primary_scanpy_processed_scanorama.h5ad"
+# adatas = sc.read_h5ad(filename)
+```
+
+
+
+```{r}
+# exprs <- py$adatas$X$todense()
+exprs <- py$adatas$X
+exprs <- t(exprs)
+colnames(exprs) <- py$adatas$obs_names$to_list()
+rownames(exprs) <- py$adatas$var_names$to_list()
+# Create the Seurat object
+seurat <- Seurat::CreateSeuratObject(exprs)
+# Set the expression assay
+seurat <- Seurat::SetAssayData(seurat, "data", exprs)
+# Add observation metadata
+seurat <- Seurat::AddMetaData(seurat, py$adatas$obs)
+```
+
+
+```{r}
+# Add embedding
+embedding <- py$adatas$obsm["X_scanorama"]
+rownames(embedding) <- py$adatas$obs_names$to_list()
+# rownames(embedding) <- py$spot_names
+seurat[["scanorama"]] <- Seurat::CreateDimReducObject(embedding, key = "scanorama_")
+
+```
+
+```{r}
+seurat <- Seurat::FindNeighbors(seurat, reduction = "scanorama")
+seurat <- Seurat::RunUMAP(seurat, verbose = FALSE, reduction = "scanorama")
+```
+
+
+```{r, fig.width = 20}
+# Seurat::DimPlot(seurat, reduction = "umap", group.by = "library_id", cols = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666'))
+# p1 <- Seurat::DimPlot(seurat, reduction = "umap", group.by = "library_id", cols = c('#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd'))
+Seurat::DimPlot(seurat, reduction = "umap", group.by = "Library_ID")
+ggplot2::ggsave(paste0(output_figs, "integrated_umap.png"))
+# fig_path <- paste0(output_figs, "/hvg_scaled_scanorama_UMAP")
+# write_plot2file_my(p1,filename = fig_path, width = 10, height = 8)
+```
+
+
+```{r}
+sig_select <- c("PDAC.collisson.classical","PDAC.moffitt.basal", "PDAC.P19.Fibroblast", "PDAC.U.Exocrine.Acinar", "PDAC.U.Endocrine.Beta",
+                "PDAC.U.Immune.Tcell.CD8", "PDAC.U.Immune.Bcell", "PDAC.U.Immune.Macrophage", "PDAC.moffitt.activatedstroma", "PDAC.moffitt.normalstroma")
+# Path to a signature file
+sig_path <- "/repos/P02567_TBIO-3021_10X_pilot/data/import/Signatures/signatures_220210.txt"
+
+sct_threshold <- 0.25
+spot_threshold <- 5
+assay = 'RNA'
+slot = 'data'
+# Find genes abundant in this sample
+
+gene_list <- seurat_select_abundant_genes_my(seurat, sct_threshold=sct_threshold, spot_threshold=spot_threshold,
+                                               assay=assay, slot=slot)
+# Load signatures and filter them down to only well represented genes
+signature_list <- read_filter_signatures_my(sig_path, gene_list, sig_names=sig_select,
+                                          sig_length_min=1, sig_length_max=1000, ratio_threshold=0)
+# Add signature scores to a seurat object
+seurat <- add_signature_scores_my(seurat, signature_list, prefix="sig.", assay=assay)
+
+# Seurat renames column names, this step finds new signature names
+sig_names_upd <- colnames(seurat@meta.data[grep("sig.", colnames(seurat@meta.data))])
+
+```
+
+
+```{r}
+for(i in c(1:9)){
+   Seurat::FeaturePlot(seurat, features = sig_names_upd[i], min.cutoff = 0, max.cutoff = 1)
+    ggplot2::ggsave(paste0(output_figs,"/", sig_names_upd[i], "_integrated.png"))
+}
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[10], min.cutoff = 0, max.cutoff = 2.5)
+```
+
+```{r}
+pt6_roi1 <- Seurat::WhichCells(seurat, expression = Library_ID == "PDAC_Pt2_ROI1")
+# pt6_roi2 <- Seurat::WhichCells(seurat, expression = Library_ID == "PDAC_Pt2_ROI4")
+Seurat::DimPlot(seurat, reduction = "umap", cells.highlight = c(pt6_roi1), cols.highlight = c("darkblue"))
+```
+

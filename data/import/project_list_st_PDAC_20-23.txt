@@ -1,0 +1,301 @@
+## Project 1 - Pilot Cohort - Human Pancreas, ST, FFPE
+project_id <- "P-20200612-0001"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/ACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <- c(
+  "ST_FFPE_HumanPanc_A",
+  "ST_FFPE_HumanPanc_B",
+  "ST_FFPE_HumanPanc_C",
+  "ST_FFPE_HumanPanc_D"
+)
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+
+## Project 2 - Pilot Cohort - Human Pancreas, ST, FF
+project_id <- "P-20200625-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/ACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "ST_FreshFrozen_HumanPanc_A",
+    "ST_FreshFrozen_HumanPanc_B",
+    "ST_FreshFrozen_HumanPanc_C",
+    "ST_FreshFrozen_HumanPanc_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 3 - Pilot Cohort - PDAC, ST, FFPE PolyA
+project_id <- "P-20201216-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(#"FFPE_Human_PDAC_1284133B_ROI1_s3_B",
+    #"FFPE_Human_PDAC_1284133B_ROI2_s3_D",
+    "FFPE_Human_PDAC_S001890_s3_C",		
+    "FFPE_Human_PDAC_S001890_s4_D",		
+    "FFPE_Human_PDAC_S001891_s1_A",		
+    "FFPE_Human_PDAC_S001891_s2_B")
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+
+## Project 4 - BioIVT, PDAC FFPE round 1
+project_id <- "P-20210915-0008"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+"Human_FFPE_PDAC_1255908B_s1_D",		
+ "Human_FFPE_PDAC_1255908B_s2_D",		
+ "Human_FFPE_PDAC_1255908B_s3_C",		
+ "Human_FFPE_PDAC_1255908B_s4_D",		
+ "Human_FFPE_PDAC_1275301B_s1_A",		
+ "Human_FFPE_PDAC_1275301B_s2_A",		
+ "Human_FFPE_PDAC_1275301B_s3_A",		
+ "Human_FFPE_PDAC_1275301B_s4_B",		
+ "Human_FFPE_PDAC_1275309B_s1_C",
+ "Human_FFPE_PDAC_1275309B_s2_C",		
+ "Human_FFPE_PDAC_1275321B_s1_B",		
+ "Human_FFPE_PDAC_1275321B_s2_B"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 5 - BioIVT, PDAC FFPE round 2
+project_id <- "P-20211020-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_PDAC_FFPE_1274423B_ROI1_s1_A",
+    "Human_PDAC_FFPE_1274423B_ROI2_s1_B",
+    "Human_PDAC_FFPE_1255880B_ROI1_s1_C",
+    "Human_PDAC_FFPE_1255880B_ROI2_s1_D",
+    "Human_PDAC_FFPE_759110QB_ROI1_s1_A",
+    "Human_PDAC_FFPE_759110QB_ROI2_s1_B",
+    "Human_PDAC_FFPE_759110QB_ROI3_s1_C",
+    "Human_PDAC_FFPE_759110QB_ROI4_s1_D",
+    "Human_PDAC_FFPE_1274423B_ROI1_s2_A",
+    "Human_PDAC_FFPE_1274423B_ROI2_s2_B",
+    "Human_PDAC_FFPE_1255880B_ROI1_s2_C",
+    "Human_PDAC_FFPE_1255880B_ROI2_s2_D",
+    "Human_PDAC_FFPE_759110QB_ROI1_s2_A",
+    "Human_PDAC_FFPE_759110QB_ROI2_s2_B",
+    "Human_PDAC_FFPE_759110QB_ROI3_s2_C",
+    "Human_PDAC_FFPE_759110QB_ROI4_s2_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 6 - BioIVT, PDAC FF
+project_id <- "P-20211025-0004"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_PDAC_FF_1298443F_s1_A",
+    "Human_PDAC_FF_1298443F_s2_B",
+    "Human_PDAC_FF_1282994F_s1_C",
+    "Human_PDAC_FF_1282994F_s2_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 7 - BioIVT, PDAC round 3
+project_id <- "P-20211108-0001"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_PDAC_FFPE_759104PB_ROI1_s1_A",
+    "Human_PDAC_FFPE_ILS52188PT1_ROI1_s1_B",
+    "Human_PDAC_FFPE_1275233B_ROI1_s1_C",
+    "Human_PDAC_FFPE_1275329B_ROI1_s1_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 8 - Oxford, PDAC Pt5 and german E27038
+project_id <- "P-20211201-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_PDAC_FFPE_E27038_ROI1_s1_A",
+    "Human_PDAC_FFPE_E27038_ROI2_s1_B",
+    "Human_PDAC_FFPE_E27038_ROI3_s1_C",
+    "Human_PDAC_FFPE_E27038_ROI4_s1_D",
+    "Human_PDAC_FFPE_Mega_Pt5_ROI1_s1_A",
+    "Human_PDAC_FFPE_Mega_Pt5_ROI2_s1_B",
+    "Human_PDAC_FFPE_Mega_Pt5_ROI3_s1_C",
+    "Human_PDAC_FFPE_Mega_Pt5_ROI4_s1_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 9 - BioIVT, PDAC Troubleshoot 10X on-site
+project_id <- "P-20211213-0006"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_PDAC_FFPE_1274423B_ROI2_s4",
+    "Human_PDAC_FFPE_1274423B_ROI1_s4",
+    "Human_FFPE_PDAC_1275301B_s7_C",
+    "Human_FFPE_PDAC_1275301B_s8_D",
+    "Human_PDAC_FFPE_1274423B_ROI2_s3_A",
+    "Human_PDAC_FFPE_1274423B_ROI1_s3_B",
+    "Human_FFPE_PDAC_1275301B_s5_C",
+    "Human_FFPE_PDAC_1275301B_s6_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 10 - Oxford, PDAC Pt 1 and Pt 6
+project_id <- "P-20220228-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_FFPE_PDAC_Mega_Pt1_ROI1_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt1_ROI2_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt1_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt1_ROI4_s1_D",
+    "Human_FFPE_PDAC_Mega_Pt6_ROI1_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt6_ROI2_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt6_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt6_ROI4_s1_D"
+  )
+
+## Project 11 - Oxford, PDAC Pt 2 and Pt 3
+project_id <- "P-20220310-0001"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_FFPE_PDAC_Mega_Pt2_ROI1_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt2_ROI2_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt2_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt2_ROI4_s1_D",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI1_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI2_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI4_s1_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 11.5 - PDAC, Oxford Pt 3 Andy Practice
+
+project_id <- "P-20220321-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_FFPE_PDAC_Mega_Pt3_ROI1_S11_A",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI2_S11_B",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI3_S11_C",
+    "Human_FFPE_PDAC_Mega_Pt3_ROI4_S11_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 12 - Oxford, PDAC Pt 4 and Pt 11
+project_id <- "P-20220322-0008"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_FFPE_PDAC_Mega_Pt4_ROI1_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt4_ROI2_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt4_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt4_ROI4_s1_D",
+    "Human_FFPE_PDAC_Mega_Pt11_ROI1_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt11_ROI2_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt11_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt11_ROI4_s1_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 13 - Oxford, PDAC Pt 8 and Pt E5058
+project_id <- "P-20220427-0002"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_FFPE_PDAC_E5058_ROI1_s1_A",
+    "Human_FFPE_PDAC_E5058_ROI2_s1_B",
+    "Human_FFPE_PDAC_E5058_ROI3_s1_C",
+    "Human_FFPE_PDAC_E5058_ROI4_s1_D",
+    "Human_FFPE_PDAC_Mega_Pt8_ROI1_s1_A",
+    "Human_FFPE_PDAC_Mega_Pt8_ROI2_s1_B",
+    "Human_FFPE_PDAC_Mega_Pt8_ROI3_s1_C",
+    "Human_FFPE_PDAC_Mega_Pt8_ROI4_s1_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 14 - PDAC, Oxford Pt E1265 and E2547
+project_id <- "P-20220510-0005"
+project_folder <- "10X_ST_Data_2022_PDAC"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <-
+  c(
+    "Human_FFPE_PDAC_E1265_ROI1_s1_A",
+    "Human_FFPE_PDAC_E1265_ROI2_s1_B",
+    "Human_FFPE_PDAC_E1265_ROI3_s1_C",
+    "Human_FFPE_PDAC_E1265_ROI4_s1_D",
+    "Human_FFPE_PDAC_E2547_ROI1_s1_A",
+    "Human_FFPE_PDAC_E2547_ROI2_s1_B",
+    "Human_FFPE_PDAC_E2547_ROI3_s1_C",
+    "Human_FFPE_PDAC_E2547_ROI4_s1_D"
+  )
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+  
+  
+## Project 15 - APACT samples
+project_id <- "P-20230502-0001"
+project_folder <- "/SpaceRanger_outputs/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <- c(
+    "FFPE_Human_PDAC_S158915_ROI1_s1_A", "FFPE_Human_PDAC_S158915_ROI2_s1_B",
+    "FFPE_Human_PDAC_S158916_ROI1_s1_B", "FFPE_Human_PDAC_S158917_ROI1_s1_C",
+    "FFPE_Human_PDAC_S158918_ROI1_s1_C", "FFPE_Human_PDAC_S158918_ROI2_s1_D",
+    "FFPE_Human_PDAC_S158919_ROI1_s1_A", "FFPE_Human_PDAC_S158920_ROI1_s1_A",
+    "FFPE_Human_PDAC_S158921_ROI1_s1_B", "FFPE_Human_PDAC_S158921_ROI2_s1_C",
+    "FFPE_Human_PDAC_S158921_ROI3_s1_D", "FFPE_Human_PDAC_S158922_ROI1_s1_D",
+    "FFPE_Human_PDAC_S158923_ROI1_s1_A", "FFPE_Human_PDAC_S158924_ROI1_s1_C",
+    "FFPE_Human_PDAC_S158924_ROI2_s1_D", "FFPE_Human_PDAC_S158925_ROI1_s1_A",
+    "FFPE_Human_PDAC_S158925_ROI2_s1_B", "FFPE_Human_PDAC_S158926_ROI1_s1_B",
+    "FFPE_Human_PDAC_S158926_ROI2_s1_C", "FFPE_Human_PDAC_S158926_ROI3_s1_D",
+    "FFPE_Human_PDAC_S158927_ROI1_s1_C", "FFPE_Human_PDAC_S158928_ROI1_s1_A",
+    "FFPE_Human_PDAC_S158928_ROI2_s1_B")
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+
+## Project 16 - Our very first probes samples
+project_id <- "P-20210125-0018"
+project_folder <- "/SpaceRanger_probes_outputs/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/GRCh38-2020-A/")
+s3_subfolders <- c("HumanPanc_1284133B_ROI1_FFPE_s4_A", "HumanPanc_1284133B_ROI2_FFPE_s4_B",
+                   "HumanPanc_S001890_FFPE_s5_C", "HumanPanc_S001891_FFPE_s3_D")
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")

@@ -1,0 +1,41 @@
+## Project 1 - KPC syngeneics pilot 1
+
+project_id <- "P-20210302-0005"
+project_folder <- "10X_ST_Data_2022/KP_syngeneics/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+
+s3_subfolders <- c("Mouse_FF_KP2-parental_972274200085156_s1_B",
+                   "Mouse_FF_KP2-parental_972274200087043_s1_C",
+                   "Mouse_FF_KP2-parental_972274200087104_s1_A",
+                   "Mouse_FF_KP2-parental_972274200087431_s1_D")
+
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+# Stash path information
+stash_folder <- "XXXX"
+
+
+## Project 2 - KPC syngeneics pilot 2
+
+project_id <- "P-20210302-0005"
+project_folder <- "10X_ST_Data_2022/KP_syngeneics/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+
+s3_subfolders <- c(" FFPE_Mouse_KPC1_3372_ROI1_s1_A",
+"FFPE_Mouse_KPC1_3382_ROI1_s1_D",
+"FFPE_Mouse_KPC1_3973_ROI1_s1_A",
+"FFPE_Mouse_KPC1_518_ROI1_s1_C",
+"FFPE_Mouse_KPC1_560_ROI1_s1_B",
+"FFPE_Mouse_KPC2_06E90_353987_ROI1_s1_B",
+"FFPE_Mouse_KPC2_06E90_354850_ROI1_s1_C",
+"FFPE_Mouse_KPC2_06E90_354852_ROI1_s1_D",
+"FFPE_Mouse_KPC2_06E90_354853_ROI1_s1_A",
+"FFPE_Mouse_KPC2_06E90_354854_ROI1_s1_B",
+"FFPE_Mouse_KPC2_06E90_JAX804_ROI1_s1_C",
+"FFPE_Mouse_KPC2_06E90_JAX808_ROI1_s1_D"
+)
+
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+# Stash path information
+stash_folder <- "XXXX"

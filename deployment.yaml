@@ -1,0 +1,13 @@
+airflow:
+  dags:
+    - sourcefile: ./dag.py
+      destinationfile: sparta_automation_dag.py
+
+docker:
+  base_image: ####.dkr.ecr.XXXX.amazonaws.com/sparta_automation
+  tag: latest
+
+cloudformation:
+  stackname: sparta-automation
+  parameter_overrides:
+    DockerImage: concat(ref(docker.base_image),:,ref(docker.tag))

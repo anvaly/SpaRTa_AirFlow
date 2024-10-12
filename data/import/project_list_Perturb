@@ -1,0 +1,22 @@
+## Project 1 - Perturb Pilot - sgMIF2 and sgMIF3 in MC38 mixed
+project_id <- "P-20220921-0010"
+project_folder <- "2022_PerturbSeq"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/CITE-Seq/mm10-2020-A/")
+s3_subfolders <- c(
+  "MC38_Neg1_MIF3_Guide"
+)
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+  
+## Project 2 - Perturb Pilot - MC38 Glides
+project_id <- "P-20221024-0001"
+project_folder <- "2022_PerturbSeq_Data/"
+s3_path <-
+  paste0(project_id, "/scRNA-Seq/CITE-Seq/mm10-2020-A/")
+s3_subfolders <- c(
+  "MC38_Glides_Guide"
+)
+extensions <-
+  c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res", ".gz")
+  

@@ -1,0 +1,467 @@
+---
+title: "scanorama integration"
+output: html_document
+author: "Andy Kavran"
+date: "12 April 2022"
+---
+
+Set the R environment
+
+Before running this script it seems necessary to run these commands in terminal:
+
+$ cd /XXXX
+$ miniconda3/bin/conda init bash
+$ bash
+$ conda activate Scanorama
+
+it fails at use_condaenv() if I don't do this, but only sometimes....
+```{r r_env}
+`%>%` <- magrittr::`%>%`
+library(reticulate)
+Sys.setenv("RETICULATE_PYTHON"="XXXX")
+
+use_condaenv("Scanorama",
+             "XXXX",
+             require = TRUE)
+
+source("/repos/P02567_TBIO-3021_10X_pilot/code/utils/utils_in_out.R")
+source("/repos/P02567_TBIO-3021_10X_pilot/code/R/Utils/utils_10X_vis.R")
+
+sc <- import("scanpy")
+```
+
+
+Set up the python environment
+```{python py_env}
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import matplotlib.pyplot as plt
+import matplotlib
+import json as json
+from pathlib import Path, PurePath
+import scanorama
+import scanpy.external as sce
+
+sc.settings.verbosity = 3
+```
+
+
+```{r parameters}
+# cohort_regex <- "PDAC_759110QB_ROI2_s1|PDAC_Pt1_ROI2|PDAC_Pt2_ROI3|PDAC_759110QB_ROI4_s1|PDAC_759110QB_ROI4_s2|PDAC_Pt5_ROI3|PDAC_1255908B_s3|PDAC_1255908B_s4|HumanPanc_S001890_FFPE_C_Apr21|HumanPanc_S001891_FFPE_D_Apr21"
+cohort_regex <- "Pt|E27038"
+input_path <-"XXXX"
+output_figs <- "XXXX"
+dir.create(output_figs, showWarnings = FALSE)
+
+list_files <- dir(input_path, pattern = paste0(cohort_regex, ".*.h5ad"), full.names = TRUE)
+list_files
+```
+
+Ingest first dataset, then append each dataset to it
+```{python ingest h5 datasets}
+import scanpy as sc
+adata = []
+# X_list = []
+for i, file in enumerate(r.list_files):
+    temp_data = sc.read_h5ad(file)
+    adata.append(temp_data)
+    # X_list.append(temp_data.X)
+```
+
+```{python}
+adata
+```
+
+
+```{python concatenate scanpy objects}
+library_names = []
+for i in range(len(adata)):
+    this_name = adata[i].uns['misc']['user.Sample_Name']
+    library_names.append(this_name)
+    
+
+adata_cat = adata[0].copy()
+
+adata_cat = adata_cat.concatenate(
+    adata[1:len(adata)],
+    batch_key="library_id",
+    uns_merge="unique",
+    batch_categories=library_names)
+
+```
+
+```{python}
+adata_cat
+```
+
+
+```{python}
+sc.pp.highly_variable_genes(adata_cat, flavor="seurat", n_top_genes=2000, inplace=True, batch_key="library_id")
+
+split = []
+batch_categories = adata_cat.obs["library_id"].unique()
+for i in batch_categories:
+    split.append(adata_cat[adata_cat.obs["library_id"] == i].copy())
+# 
+for i in range(len(split)):
+    sc.pp.scale(split[i])
+
+```
+
+```{python}
+# adatas_cor = scanorama.correct_scanpy(split, return_dimred=True)
+scanorama.integrate_scanpy(split)
+```
+
+
+```{python}
+# sc.tl.pca(split, svd_solver='arpack')
+split
+```
+
+
+```{python}
+adata_cat
+```
+
+Create Seurat Object
+```{r}
+# Get the expression matrix
+exprs <- py$adata_cat$X$todense()
+exprs <- t(exprs)
+colnames(exprs) <- py$adata_cat$obs_names$to_list()
+rownames(exprs) <- py$adata_cat$var_names$to_list()
+# Create the Seurat object
+seurat <- Seurat::CreateSeuratObject(exprs)
+# Set the expression assay
+seurat <- Seurat::SetAssayData(seurat, "data", exprs)
+# Add observation metadata
+seurat <- Seurat::AddMetaData(seurat, py$adata_cat$obs)
+# Add embedding
+# embedding <- py$adata_cat$obsm["X_pca"]
+# rownames(embedding) <- py$adata_cat$obs_names$to_list()
+# seurat[["pca"]] <- Seurat::CreateDimReducObject(embedding, key = "pca_")
+```
+
+
+```{python}
+# Get all the integrated matrices.
+scanorama_int = [ad.obsm['X_scanorama'] for ad in split]
+
+# make into one matrix.
+all_s = np.concatenate(scanorama_int)
+print(all_s.shape)
+
+# add to the AnnData object
+adata_cat.obsm["Scanorama"] = all_s
+```
+
+
+```{r}
+# Add embedding
+embedding <- py$adata_cat$obsm["Scanorama"]
+rownames(embedding) <- py$adata_cat$obs_names$to_list()
+# rownames(embedding) <- py$spot_names
+seurat[["scanorama"]] <- Seurat::CreateDimReducObject(embedding, key = "scanorama_")
+
+```
+
+
+```{r}
+seurat <- Seurat::FindNeighbors(seurat, reduction = "scanorama", dims = 1:50)
+seurat <- Seurat::RunUMAP(seurat, dims = 1:50, verbose = FALSE, reduction = "scanorama")
+```
+
+```{r, fig.height=8, fig.width=10}
+# Seurat::DimPlot(seurat, reduction = "umap", group.by = "library_id", cols = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666'))
+# p1 <- Seurat::DimPlot(seurat, reduction = "umap", group.by = "library_id", cols = c('#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd'))
+p1 <- Seurat::DimPlot(seurat, reduction = "umap", group.by = "library_id")
+fig_path <- paste0(output_figs, "/hvg_scaled_scanorama_UMAP")
+write_plot2file_my(p1,filename = fig_path, width = 10, height = 8)
+```
+
+```{r}
+p2 <- Seurat::DimPlot(seurat, reduction = "umap",split.by = "library_id",group.by = "library_id", ncol = 5)+ theme(legend.position = "none")
+fig_path <- paste0(output_figs, "/hvg_scaled_scanorama_UMAP_facet")
+write_plot2file_my(p2,filename = fig_path, width = 20, height = 8)
+
+```
+
+```{r}
+Seurat::DimPlot(seurat, reduction = "umap",split.by = "library_id",group.by = "library_id", ncol = 6)+ theme(legend.position = "none")
+```
+
+```{r}
+p4 <- Seurat::FeaturePlot(seurat, features = c("DES", "COL1A1", "GATA6","PNLIP"))
+fig_file <- paste0(output_figs, "/feature_UMAP")
+# write_plot2file_my(p4, filename = fig_file)
+```
+
+```{r}
+sig_select <- c("PDAC.collisson.classical","PDAC.moffitt.basal", "PDAC.P19.Fibroblast", "PDAC.U.Exocrine.Acinar", "PDAC.U.Endocrine.Beta",
+                "PDAC.U.Immune.Tcell.CD8", "PDAC.U.Immune.Bcell", "PDAC.U.Immune.Macrophage", "PDAC.moffitt.activatedstroma", "PDAC.moffitt.normalstroma")
+# Path to a signature file
+sig_path <- "/repos/P02567_TBIO-3021_10X_pilot/data/import/Signatures/signatures_220210.txt"
+
+sct_threshold <- 0.25
+spot_threshold <- 5
+assay = 'RNA'
+slot = 'data'
+# Find genes abundant in this sample
+
+gene_list <- seurat_select_abundant_genes_my(seurat, sct_threshold=sct_threshold, spot_threshold=spot_threshold,
+                                               assay=assay, slot=slot)
+# Load signatures and filter them down to only well represented genes
+signature_list <- read_filter_signatures_my(sig_path, gene_list, sig_names=sig_select,
+                                          sig_length_min=1, sig_length_max=1000, ratio_threshold=0)
+# Add signature scores to a seurat object
+seurat <- add_signature_scores_my(seurat, signature_list, prefix="sig.", assay=assay)
+
+# Seurat renames column names, this step finds new signature names
+sig_names_upd <- colnames(seurat@meta.data[grep("sig.", colnames(seurat@meta.data))])
+
+# Set a min and a max value to a Seurat object for a spatial plot
+# seurat <- set_spatial_min_max_my(seurat, sig_names_upd)
+# sig_names_upd <- colnames(seurat@meta.data[grep("sig.", colnames(seurat@meta.data))])
+# sig_num <- sig_names_upd %>% length
+```
+
+```{r, fig.width= 7.3, fig.height=6}
+# output_figs <- 'XXXX'
+for(i in c(1:9)){
+   Seurat::FeaturePlot(seurat, features = sig_names_upd[i], min.cutoff = 0, max.cutoff = 1)
+    ggsave(paste0(output_figs,"/", sig_names_upd[i], "_integrated.png"))
+}
+Seurat::FeaturePlot(seurat, features = sig_names_upd[10], min.cutoff = 0, max.cutoff = 2.5)
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[1], min.cutoff = 0, max.cutoff = 1)
+# ggsave(paste0(sig_names_upd[1], "_integrated.png"))
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[2], min.cutoff = 0, max.cutoff = 1)
+# ggsave(paste0(sig_names_upd[2], "_integrated.png"))
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[3], min.cutoff = 0, max.cutoff = 1)
+# ggsave(paste0(sig_names_upd[3], "_integrated.png"))
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[4], min.cutoff = 0, max.cutoff = 1)
+# ggsave(paste0(sig_names_upd[4], "_integrated.png"))
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[5], min.cutoff = 0, max.cutoff = 1)
+# ggsave(paste0(sig_names_upd[5], "_integrated.png"))
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[6], min.cutoff = 0, max.cutoff = 1)
+# ggsave("classical_integrated.png")
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[7], min.cutoff = 0, max.cutoff = 1)
+# ggsave("classical_integrated.png")
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[8], min.cutoff = 0, max.cutoff = 1)
+# ggsave("classical_integrated.png")
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[9], min.cutoff = 0, max.cutoff = 1)
+# ggsave("classical_integrated.png")
+# Seurat::FeaturePlot(seurat, features = sig_names_upd[19], min.cutoff = 0, max.cutoff = 1)
+# ggsave("classical_integrated.png")
+```
+
+
+```{r}
+seurat <- Seurat::FindClusters(seurat, resolution =0.3)
+```
+
+```{r}
+p3 <- Seurat::DimPlot(seurat, reduction = "umap", group.by ="RNA_snn_res.0.3")
+fig_path <- paste0(output_figs, "/scanorama_clusters_UMAP")
+write_plot2file_my(p3,filename = fig_path, width = 8, height = 8)
+```
+
+```{r}
+table(seurat@meta.data$RNA_snn_res.0.3, seurat@meta.data$library_id) %>% image
+```
+
+
+```{python}
+# adata_cat.raw = adata_cat
+# adata_cat = adata_cat[:,adata_cat.var.highly_variable_nbatches > 1]
+# adata_cat
+```
+
+
+
+```{python}
+# adatas = {}
+# for batch in library_names:
+#     adatas[batch] = adata_cat[adata_cat.obs['library_id'] == batch,]
+# 
+# adatas 
+```
+
+
+```{python}
+# #convert to list of AnnData objects
+# adatas = list(adatas.values())
+# 
+# # run scanorama.integrate
+# scanorama.integrate_scanpy(adatas, dimred = 50)
+```
+
+```{python}
+# # Get all the integrated matrices.
+# scanorama_int = [ad.obsm['X_scanorama'] for ad in adatas_cor]
+# 
+# # make into one matrix.
+# all_s = np.concatenate(scanorama_int)
+# print(all_s.shape)
+# 
+# # add to the AnnData object
+# adata_cat.obsm["Scanorama"] = all_s
+```
+
+
+```{python}
+# spot_names = []
+# for i in range(len(adatas_cor)):
+#     spot_names.append(adatas_cor[i].obs_names.to_list())
+# spot_names
+```
+
+
+```{r}
+# # Add embedding
+# embedding <- py$adata_cat$obsm["Scanorama"]
+# rownames(embedding) <- py$adata_cat$obs_names$to_list()
+# # rownames(embedding) <- py$spot_names
+# seurat[["scanorama"]] <- Seurat::CreateDimReducObject(embedding, key = "scanorama_")
+# # scanorama_mat <- Seurat::CreateDimReducObject(embedding, key = "scanorama_")
+```
+
+
+```{r}
+# Seurat::DimPlot(seurat, reduction = "scanorama", group.by = "library_id")
+```
+
+
+
+
+
+```{r}
+py$all_s %>% dim
+
+plot(py$all_s[,1], py$all_s[,2])
+```
+
+
+```{r}
+Cstack_info()
+```
+
+
+possibly an environment limit. C-stack usage
+
+```{python}
+sc.pp.neighbors(adata_cat, use_rep="Scanorama")
+sc.tl.umap(adata_cat)
+```
+
+```{python}
+sc.pl.umap(adata_cat, color = 'library_id')
+```
+
+
+```{python}
+sc.pl.umap(adata_cat, color = ["TSPAN8", "COL1A1", "TMSB4X", 'library_id'])
+```
+
+
+```{python}
+sc.tl.leiden(adata_cat, resolution = .7, key_added="clusters")
+```
+
+```{python}
+sc.pl.umap(adata_cat, color = ['clusters'])
+```
+
+
+```{python}
+np.unique(adata_cat.obs["library_id"])
+adata_cat
+```
+
+
+```{python}
+fig, axs = plt.subplots(1, 2, figsize=(15, 10))
+
+for i, library in enumerate(np.unique(adata_cat.obs["library_id"])):
+    ad = adata_cat[adata_cat.obs.library_id == library, :].copy()
+    sc.pl.spatial(
+        ad,
+        img_key="hires",
+        library_id=library,
+        color="clusters",
+        size=1.5,
+        legend_loc=None,
+        show=False,
+        ax=axs[i],
+    )
+
+plt.tight_layout()
+```
+
+```{python}
+# for i, library in enumerate(np.unique(adata_cat.obs["library_id"])):
+lib = adata_cat.obs.library_id.unique()
+
+ad = adata_cat[adata_cat.obs.library_id == lib[0], :].copy()
+sc.pl.spatial(
+    ad,
+    img_key="hires",
+    library_id=lib[0],
+    color="clusters",
+    size=1.5,
+    legend_loc=None,
+    show=True)
+```
+
+
+```{python}
+# adata_cat
+sce.pp.scanorama_integrate(adata_cat, 'library_id', )
+```
+
+```{python}
+sc.pp.neighbors(adata_cat, use_rep="X_scanorama")
+sc.tl.umap(adata_cat)
+sc.tl.leiden(adata_cat, key_added="clusters")
+```
+
+
+```{python}
+sc.pp.calculate_qc_metrics(adata, percent_top=None, log1p=False, inplace=True)
+```
+
+```{python}
+sc.pl.violin(adata, ['n_genes_by_counts',  'total_counts'], groupby='library_id', rotation = 45)
+```
+
+```{python}
+sc.pl.highest_expr_genes(adata, n_top=20)
+```
+
+```{python}
+# save the counts to a separate object for later, we need the normalized counts in raw for DEG dete
+counts_adata = adata.copy()
+
+sc.pp.normalize_total(adata, inplace=True)
+sc.pp.log1p(adata)
+# take 1500 variable genes per batch and then use the union of them.
+sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=1500, inplace=True, batch_key="library_id")
+
+# subset for variable genes
+adata.raw = adata
+adata = adata[:,adata.var.highly_variable_nbatches > 0]
+
+# scale data
+# sc.pp.scale(adata)
+```
+
+```{python}
+sc.pp.neighbors(adata)
+sc.tl.umap(adata)
+sc.tl.leiden(adata, key_added="clusters")
+```
+
+
+
+

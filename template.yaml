@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Short description
+
+Parameters:
+  AppName:
+    Type: String
+    Default: sparta_automation
+  Role:
+    Type: String
+    Default: arn:aws:iam::####:role/XXXX
+  DockerImage:
+    Type: String
+
+Resources:
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${AppName}Cluster"
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${AppName}TaskDef"
+      NetworkMode: awsvpc
+      Memory: "125000"
+      RequiresCompatibilities:
+        - EC2
+      ContainerDefinitions:
+        - Name: !Sub "${AppName}Container"
+          Image: !Ref DockerImage
+          MountPoints:
+            - ContainerPath: /XXXX
+              SourceVolume: XXXX
+              ReadOnly: false # optional, specify if the mount point should be read-only or not
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: us-east-1
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: !Sub "${AppName}"
+      Volumes:
+        - Name: XXXX
+          Host:
+            SourcePath: /XXXX
+      ExecutionRoleArn: !Ref Role
+      TaskRoleArn: !Ref Role
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${AppName}LogGroup"

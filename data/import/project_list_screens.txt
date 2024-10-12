@@ -1,0 +1,13 @@
+## Project 1 - KP2 In Vivo Screen
+
+project_id <- "P-20230628-0011"
+project_folder <- "/KP2_InVivo/"
+s3_path <- paste0(project_id, "/gRNA/")
+
+s3_subfolders <- c("")
+
+extensions <- c("txt")
+
+# Stash path information
+stash_folder <- "XXXX"
+

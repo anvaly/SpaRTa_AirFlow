@@ -1,0 +1,476 @@
+---
+title: "scanorama_integration_simplified"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '/repos/P02567_TBIO-3021_10X_pilot/') # markdown scripts change the working directory to be this script's directory. Change back to head directory of repo
+```
+
+
+Set up the R environment and launch Python
+```{r r_env}
+`%>%` <- magrittr::`%>%`
+getwd()
+library(reticulate)
+library(Seurat)
+Sys.setenv("RETICULATE_PYTHON"="XXXX")
+
+use_condaenv("Scanorama",
+             "XXXX",
+             require = TRUE)
+source("./code/R/Utils/utils_10X_matrix.R")
+source("./code/R/Utils/utils_10X_signatures.R")
+source("./code/utils/utils_signatures.R")
+source("./code/R/Utils/utils_10X_in_out.R")
+source("./code/R/Utils/utils_10X_cohort.R")
+source("./code/R/Utils/utils_10X_scanorama_integration.R")
+source("./code/R/Utils/utils_10X_object.R")
+
+sc <- import("scanpy")
+scanorama <- import('scanorama')
+```
+
+
+Set up the python environment
+```{python py_env}
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import matplotlib.pyplot as plt
+import matplotlib
+import json as json
+from pathlib import Path, PurePath
+import scanorama
+import scanpy.external as sce
+
+sc.settings.verbosity = 1
+```
+
+Prep Integration parameters
+```{r}
+# Number of anchor features
+num_features <- 7000
+# Use SCT pearson reisduals?
+sct <- TRUE
+assay <- "SCT"
+slot <- "scale.data" # "data" or "scale.data"
+knn <- 60
+alpha = 0.1
+# Adjust future.globals.maxSize for method requirements
+options(future.globals.maxSize = 20000*1024^2)
+
+
+
+```
+
+
+
+List out the the paths for input and outputs
+```{r}
+input_path <- c("XXXX")
+                 
+seurat_path <- c("XXXX")
+
+output_path <- "XXXX"
+dir.create(output_path)
+
+output_figs <- "XXXX"
+dir.create(output_figs)
+
+# meta_df <- readr::read_delim(paste0(input_path, "full_pdac_meta_data.txt"), delim = "\t")
+
+# cohort_regex <- "PDAC_759110QB_ROI2_s1|PDAC_Pt1_ROI2|PDAC_Pt2_ROI3|PDAC_759110QB_ROI4_s1|PDAC_759110QB_ROI4_s2|PDAC_Pt5_ROI3|PDAC_1255908B_s3|PDAC_1255908B_s4|HumanPanc_S001890_FFPE_C_Apr21|HumanPanc_S001891_FFPE_D_Apr21"
+
+# cohort_regex <- "PDAC_759110QB_ROI2_s1|PDAC_Pt1_ROI2|PDAC_Pt2_ROI3|PDAC_759110QB_ROI4_s1|PDAC_Pt5_ROI3|PDAC_1255908B_s3|HumanPanc_S001890_FFPE_C_Apr21|HumanPanc_S001891_FFPE_D_Apr21"
+
+cohort_regex <- "full_pdac_cohort_seurat_noSCT.RDS"
+reject_regex <- NULL #"file_list|v2|FF"
+# selected <-meta_df %>% dplyr::filter(Quality_Status == TRUE & Primary == TRUE & grepl("Pt", Sample_Name) & !is.na(Slide))
+
+# cohort_regex <- stringr::str_c(selected$Sample_Name, collapse = "|")
+
+
+# List of misc fields to keep in meta data
+misc_field_list <- c("user.Sample_Name", "user.Group_Name", "user.Tissue", 
+                     "user.Date", "user.Area", "user.Project_ID", "user.Primary", 
+                     "user.Protocol", "user.Organism", "user.pt.size.factor", 
+                     "user.Clustering", "user.Slide", "Pathology.Tissue")
+```
+
+
+
+Import Seurat objects as a list
+```{r, warning=FALSE}
+# Find all files following the regex
+file_list <-  file_list <- dir(seurat_path, pattern = cohort_regex, full.names = TRUE)
+if(is.null(reject_regex) == FALSE){
+  file_list <- file_list[!grepl(reject_regex, file_list)]
+}
+
+# Ingest a set of RDS Seurat objects288
+start_time <- proc.time()
+seurat_list <- read_rds_list_simple_my(file_list) #oxford megas = 5 minutes
+proc.time() - start_time
+```
+
+```{r}
+vars_to_regress <- c("mito_percent", "ribo_percent", "user.Sample_Name")
+# merged_seurat_data <- seurat_list[[1]]
+
+# Perform SCTransform normalization
+merged_seurat_data <- Seurat::SCTransform(merged_seurat_data, assay="Spatial", 
+                                         vars.to.regress = vars_to_regress, variable.features.n = num_features,
+                                         return.only.var.genes = TRUE, verbose = TRUE, conserve.memory = TRUE)
+```
+
+```{r}
+
+```
+
+
+```{r}
+  # Update image names and remove previous clustering
+for(name in names(seurat_list)){
+  names(seurat_list[[name]]@images) <- name
+  seurat_list[[name]]@meta.data <- seurat_list[[name]]@meta.data[which(!grepl("SCT_snn_res.", names(seurat_list[[name]]@meta.data)))]
+}
+# Move misc parameters to meta data slot
+seurat_list <- seurat_misc_to_meta(seurat_list, misc_field_list=misc_field_list)
+```
+
+
+Or if merged seurat object exists:
+```{r}
+# filename <- paste0(output_path, "oxford_cohort_merge.RDS")
+# filename <- paste0("XXXX")
+# data_seurat_merged <- readRDS(filename)
+# seurat_list <- SplitObject(data_seurat_merged, "Batch")
+```
+
+```{r}
+seurat_list <- Seurat::SplitObject(merged_seurat_data, split.by = "user.Sample_Name")
+```
+
+
+
+Wrangle data for integration
+```{r}
+exprs <- prep_scanorama_integration_my(seurat_list, num_features = num_features, sct = sct,
+                                       slot = slot, assay = assay)
+
+genes <- lapply(exprs, get_gene_names_my)
+
+```
+
+
+These lists get changed to dictionaries in python. Change these to lists and double check the shape
+```{python}
+python_exprs = r.exprs
+# python_exprs
+data = python_exprs.values()
+new_list = list(data)
+# new_list = [mat.tocsr() for mat in new_list] #this is if the data is a sparse matrix instead of dense, i.e. slot = "data"
+new_list[0].shape
+# 
+gene_data = r.genes.values()
+gene_list = list(gene_data)
+len(gene_list[0])
+```
+
+
+double check that the data is  alist of numpy.ndarray or scipy csr matrices
+```{python}
+type(new_list[1])
+```
+
+
+Now integrate the data using scanorama
+```{python}
+import time
+start_time = time.time()
+integrated_data = scanorama.integrate(new_list, gene_list, verbose = True, dimred = 50, knn=int(r.knn), alpha = 0.1)
+print("--- %s seconds ---" % (time.time() - start_time))
+```
+
+
+Parse out the scanorama embeddeing matrices and concatenate.
+```{python}
+X_scanorama = integrated_data[0]
+scanorama_gene_list = integrated_data[1]
+
+all_s = np.concatenate(X_scanorama)
+print(all_s.shape)
+```
+
+
+
+Keep track of sample IDs in scanorama matrix. (might be able to get rid of this?)
+```{r}
+get_cell_num_scanorama_list <- function(x_scanorama_list){
+  item_dims <- dim(x_scanorama_list)
+  return(item_dims[1])
+}
+
+nums <- lapply(py$X_scanorama, get_cell_num_scanorama_list) %>% unlist
+
+temp_list <- list()
+sample_names <- names(exprs)
+for(i in c(1:length(nums))){
+  this_sample <- sample_names[i] %>% stringr::str_remove("_all")
+  temp_list[i] <- rep(this_sample, nums[i]) %>% list
+}
+sample_name_scanorama <- unlist(temp_list)
+```
+
+
+Merge the seurat objects into one.
+```{r}
+data_seurat_merged <- merge(x = seurat_list[[1]], y = seurat_list[2:length(seurat_list)], project = "subset_pathology_cohort", merge.data = TRUE)
+# data_seurat_merged <- seurat_merge_my(seurat_list, keep_SCT = TRUE)
+```
+
+
+```{r}
+data_seurat_merged@meta.data$Library_ID = sample_name_scanorama
+```
+
+```{r}
+# embedding <- py$all_s
+# list_spot_names <- lapply(seurat_list, colnames) %>% unlist
+# rownames(embedding) <- list_spot_names
+# scanorama_obj <- Seurat::CreateDimReducObject(embedding, key = "scanorama_", assay ="SCT")
+```
+
+```{r}
+# scan_umap <- uwot::umap(embedding, metric = "cosine")
+```
+
+
+Add scanorama embedding to merged seurat object
+```{r}
+embedding <- py$all_s
+rownames(embedding) <- rownames(merged_seurat_data@meta.data)
+
+merged_seurat_data[["scanorama"]] <- Seurat::CreateDimReducObject(embedding, key = "scanorama_", assay = "SCT")
+```
+
+
+```{r}
+saveRDS(embedding, "XXXX")
+
+embedding <- readRDS("XXXX")
+```
+
+
+
+```{r}
+# saveRDS(data_seurat_merged, file = paste0(output_path, "oxford_cohort_merge.RDS"), compress = FALSE)
+```
+
+
+
+Run UMAP on scanorama embedding
+```{r}
+# data_seurat_merged <- Seurat::FindNeighbors(data_seurat_merged, reduction = "scanorama")
+merged_seurat_data <- Seurat::RunUMAP(merged_seurat_data, verbose = TRUE, reduction = "scanorama", dims = 1:50)
+```
+
+Wrangle metadata
+```{r}
+block_ids <- merged_seurat_data@meta.data$user.Sample_Name %>% stringr::str_remove("_ROI[1234]") %>% stringr::str_remove("_s[12345678]")
+merged_seurat_data@meta.data$Blocks <- block_ids
+```
+
+
+Plot UMAP grouped by sample
+```{r, fig.width = 8}
+# colors <- RColorBrewer::brewer.pal(10, name = "Set2")
+Seurat::DimPlot(merged_seurat_data, reduction = "umap", group.by = "Blocks", shuffle = TRUE)
+ggplot2::ggsave(paste0(output_figs, "_integrated_UMAP.png"), width = 15)
+```
+
+```{r, fig.width= 20}
+Seurat::DimPlot(merged_seurat_data, reduction = "umap", group.by = "Blocks", shuffle = FALSE, raster = FALSE)+ ggplot2::theme(aspect.ratio = 1)
+   ggplot2::ggsave(paste0(output_figs, "_integrated_UMAP.png"), width = 20)
+```
+
+
+```{r, fig.width=16}
+# Seurat::DimPlot(data_seurat_merged, reduction = "umap",split.by = "Blocks", group.by = "Pathology.Group", ncol = 4)
+patchwork::wrap_plots(
+  (Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    split.by = "Blocks",
+                    features = "Pathology.Epithelium.percent", combine = FALSE)), ncol = 6, guides = "collect")
+```
+
+
+```{r}
+Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    features = "Pathology.Epithelium.percent") + ggplot2::theme(aspect.ratio = 1)
+Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    features = "Pathology.Epithelium") + ggplot2::theme(aspect.ratio = 1)
+```
+
+```{r}
+Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    features = "Pathology.Exocrine.percent") + ggplot2::theme(aspect.ratio = 1)
+```
+
+```{r}
+Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    features = "Pathology.Benign Glands.percent") + ggplot2::theme(aspect.ratio = 1)
+```
+
+```{r}
+Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    features = "Pathology.Stroma.percent") + ggplot2::theme(aspect.ratio = 1)
+```
+
+```{r}
+Seurat::FeaturePlot(merged_seurat_data, reduction = "umap",
+                    features = "Pathology.Stroma") + ggplot2::theme(aspect.ratio = 1)
+```
+
+
+```{r}
+Seurat::DimPlot(merged_seurat_data, reduction = "umap",group.by = "Pathology.Group", split.by = "Pathology.Group", ncol = 4) + ggplot2::theme(aspect.ratio = 1)
+```
+
+
+
+```{r, fig.width=15}
+Seurat::DimPlot(data_seurat_merged, reduction = "umap", group.by = "Blocks")
+ggplot2::ggsave(paste0(output_figs, "_integrated_UMAP_BlockID.png"), width = 15)
+```
+
+
+UMAP faceted by sample.
+```{r, fig.width=18}
+# colors <- RColorBrewer::brewer.pal(8, name = "Set2")
+Seurat::DimPlot(data_seurat_merged, reduction = "umap", split.by = "Library_ID", group.by = "Blocks", ncol = 8, raster = FALSE)+ ggplot2::theme(aspect.ratio = 1)
+ggplot2::ggsave(paste0(output_figs, "integrated_UMAP_facet.png"))
+```
+
+Add common signatures to seurat object
+```{r}
+sig_select <- c("PDAC.collisson.classical","PDAC.moffitt.basal", "PDAC.P19.Fibroblast", "PDAC.U.Exocrine.Acinar", "PDAC.U.Endocrine.Beta", "PDAC.moffitt.normalstroma", "PDAC.U.Immune.Tcell.CD8", "PDAC.U.Immune.Bcell", "PDAC.U.Immune.Macrophage")
+# Path to a signature file
+sig_path <- "/repos/P02567_TBIO-3021_10X_pilot/data/import/Signatures/signatures_220210.txt"
+
+sct_threshold <- 0.25
+spot_threshold <- 5
+assay = 'SCT'
+slot = 'data'
+# Find genes abundant in this sample
+
+# gene_list <- seurat_select_abundant_genes_my(data_seurat_merged, sct_threshold=sct_threshold, spot_threshold=spot_threshold, assay=assay, slot=slot)
+gene_list <- rownames(merged_seurat_data)
+# Load signatures and filter them down to only well represented genes
+signature_list <- read_filter_signatures_my(sig_path, gene_list, sig_names=sig_select,
+                                          sig_length_min=1, sig_length_max=1000, ratio_threshold=0)
+# Add signature scores to a seurat object
+merged_seurat_data <- add_signature_scores_my(merged_seurat_data, signature_list, prefix="sig.", assay=assay)
+
+# Seurat renames column names, this step finds new signature names
+sig_names_upd <- colnames(merged_seurat_data@meta.data[grep("sig.", colnames(merged_seurat_data@meta.data))])
+
+```
+
+Plot signatures on UMAP
+```{r, fig.width=5, fig.height=5}
+for(i in c(1:9)){
+   Seurat::FeaturePlot(merged_seurat_data, features = sig_names_upd[i], min.cutoff = 0, max.cutoff = 1.5) %>% print()
+    ggplot2::ggsave(paste0(output_figs, sig_names_upd[i], "_integrated.png"), width = 5, height = 5)
+}
+```
+
+
+Perform leiden clustering embedding.
+```{r}
+start_time <- proc.time()
+merged_seurat_data <- Seurat::FindNeighbors(merged_seurat_data, reduction = "scanorama", dims = 1:50, force.recalc = TRUE, verbose = TRUE)
+proc.time() - start_time
+start_time <- proc.time()
+merged_seurat_data <- Seurat::FindClusters(merged_seurat_data, resolution = 0.5, algorithm = 1, graph.name = "SCT_snn", verbose = TRUE) #48 minutes oxford megas (32 samples)
+proc.time() - start_time
+```
+
+```{r}
+table(merged_seurat_data@meta.data$seurat_clusters, merged_seurat_data@meta.data$Pathology.Group)
+table(merged_seurat_data@meta.data$seurat_clusters, merged_seurat_data@meta.data$Blocks)
+```
+
+```{r}
+cluster_by_sample <- table(merged_seurat_data@meta.data$seurat_clusters, merged_seurat_data@meta.data$user.Sample_Name)
+cluster_by_sample <- tibble::as_tibble(cluster_by_sample, .name_repair = "unique")
+colnames(cluster_by_sample) <- c("Cluster", "Sample", "Count")
+```
+
+```{r}
+spot.theme <- list(
+  theme_classic(),
+  # theme(axis.ticks.x=element_blank(), axis.text.x=element_text(size = 19, angle = 90, hjust = 0)),
+  # theme(axis.ticks.y=element_blank(), axis.text.y=element_text(size = 19)),
+  theme(axis.line=element_blank()),
+  # theme(text = element_text(size = 22)),
+  # theme(legend.position = "none"),
+  # theme(plot.margin = unit(c(10,10,10,10), "mm")),
+  scale_size_continuous(range = c(-0.3, 15)),
+  scale_x_discrete(position = "top"))
+```
+
+
+
+```{r, fig.width=20}
+library(ggplot2)
+ggplot(cluster_by_sample, aes(x = Cluster, y = Sample))+
+  geom_point(aes(size = Count))+
+  spot.theme
+```
+
+
+```{r, fig.width=15}
+Seurat::DimPlot(merged_seurat_data, group.by = "seurat_clusters", shuffle = TRUE, raster = FALSE,
+                reduction = "umap") + ggplot2::theme(aspect.ratio = 1)
+ggplot2::ggsave(paste0(output_figs,  "louvain_0.5_integrated_clusters.png"), width = 15, height = 15)
+```
+
+
+```{r, fig.height=20}
+cluster_1 <- subset(data_seurat_merged, idents = 1)
+Seurat::DimPlot(cluster_1,
+                split.by = "Library_ID",
+                shuffle = TRUE, raster = TRUE,
+                reduction = "umap", ncol = 8) + ggplot2::theme(aspect.ratio = 1)
+```
+
+```{r}
+start_time <- proc.time()
+saveRDS(data_seurat_merged, file = paste0(output_path, "leidein_0.5_oxford_megas_integrated.RDS"), compress = FALSE)
+proc.time() - start_time
+```
+
+
+```{r}
+table(data_seurat_merged$Library_ID, data_seurat_merged$seurat_clusters)
+```
+
+
+
+```{r, fig.width=25}
+patchwork::wrap_plots(Seurat::SpatialDimPlot(data_seurat_merged, cells.highlight = CellsByIdentities(object = data_seurat_merged, idents = c(4)), combine = FALSE), ncol = 6)
+```
+
+
+
+```{r, fig.width=20}
+cancer_2 <- subset(data_seurat_merged, idents = 5)
+Seurat::SpatialDimPlot(cancer_2, crop = TRUE, combine = FALSE) %>% patchwork::wrap_plots(ncol = 6)
+Seurat::SpatialFeaturePlot(cancer_2, features = "sig.PDAC.collisson.classical", crop = FALSE)
+# Seurat::SpatialDimPlot(data_seurat_merged, crop = TRUE, label = FALSE, images = "slice1.7", pt.size.factor = 1.5) + ggplot2::theme(legend.key.height = ggplot2::unit(20, 'pt'))
+```
+
+

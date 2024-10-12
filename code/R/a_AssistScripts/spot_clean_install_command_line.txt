@@ -1,0 +1,31 @@
+## SpotClean installation instructions
+## When running the script this way contiguity filter doesn't work because I can't install spdep due to a proj error
+
+
+## From command line
+
+sudo apt update
+sudo apt upgrade
+sudo apt autoremove
+
+sudo apt upgrade r-base r-base-dev
+
+sudo which R
+# /usr/bin/R
+
+sudo /usr/bin/R
+
+
+## From sudo /usr/bin/R
+
+install.packages(c("BiocManager", "devtools", "tidyverse", "spatstat", "hdf5r", "reticulate", "spdep"), dependencies=TRUE)
+BiocManager::install(version = "3.15", dependencies=TRUE)
+
+
+BiocManager::install(c("glmGamPoi", "Seurat"), dependencies=TRUE)
+devtools::install_github("zijianni/SpotClean", build_manual = TRUE, build_vignettes = TRUE)
+
+## From command line
+
+cd /repos/P02567_TBIO-3021_10X_pilot
+sudo /usr/bin/Rscript code/R/a_Wrangle/10X_to_Seurat_ST.R

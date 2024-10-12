@@ -1,0 +1,94 @@
+## Project 1 - Mouse FFPE Probes Pilot
+project_id <-"P-20220407-0002"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c("FFPE_B16_IgG_m4_s1", "FFPE_B16_IgG_m4_s2",
+                   "FFPE_B16_IgG_m4_s3", "FFPE_B16_IgG_m4_s4",
+                   "FFPE_MC38_IgG_m11_s1", "FFPE_MC38_IgG_m11_s2",
+                   "FFPE_MC38_IgG_m11_s3", "FFPE_MC38_IgG_m11_s4"
+                   )
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 2 - Mouse FFPE Poly-A Eosin Test
+project_id <-"P-20220428-0003"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/poly_a/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c("FFPE_B16_IgG_m2_s1_aq-eosin_A", "FFPE_B16_IgG_m2_s2_alc-eosin_B",
+                   "FFPE_MC38_IgG_m12_s1_aq-eosin_C", 
+                   "FFPE_MC38_IgG_m12_s2_alc-eosin_D")
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 3 - Mouse FFPE Probes Collagenase Test
+project_id <-"P-20220506-0005"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/probes/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c("FFPE_MC38_IgG_m12_s3", "FFPE_MC38_IgG_m12_s4",
+                   "FFPE_MC38_IgG_m12_s5", "FFPE_MC38_IgG_m12_s6")
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 4 - Mouse FFPE Probes Optimization Collagenase-Dispase-Mixes
+project_id <-"P-20220517-0003"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/probes/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c( "FFPE_B16_IgG_m4_s5_1X-Coll_A",		
+                    "FFPE_B16_IgG_m4_s6_2X-Coll_B",		
+                    "FFPE_B16_IgG_m4_s7_Coll-Disp_C",		
+                    "FFPE_B16_IgG_m4_s8_Liberase_D",		
+                    "FFPE_MC38_IgG_m12_s7_1X-Coll_A",		
+                    "FFPE_MC38_IgG_m12_s8_2X-Coll_B",		
+                    "FFPE_MC38_IgG_m12_s9_Coll-Disp_C",
+                    "FFPE_MC38_IgG_m12_s10_Liberase_D")
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 5- Mouse FFPE Probes Optimization Polyamines-Trehalose-Hyaluronidase
+project_id <-"P-20220602-0002"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/probes/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c( "FFPE_MC38_IgG_m12_s11_CD_A",
+                    "FFPE_MC38_IgG_m12_s12_CD-PA_B",
+                    "FFPE_MC38_IgG_m12_s13_CD-T_C",
+                    "FFPE_MC38_IgG_m12_s14_CD-PA-T_D",
+                    "FFPE_MC38_IgG_m12_s15_CD_A",
+                    "FFPE_MC38_IgG_m12_s16_H_B",
+                    "FFPE_MC38_IgG_m12_s17_CD-H_C",
+                    "FFPE_MC38_IgG_m12_s18_CD-H-PA-T_D"
+)
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 6- MC38 aPD1 ST Full Cohort
+project_id <-"P-20220622-0004"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/probes/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c( "FFPE_MC38_IgG_m10_s1_B",		
+ "FFPE_MC38_IgG_m11_s5_C",		
+ "FFPE_MC38_IgG_m12_s19_D",		
+ "FFPE_MC38_IgG_m13_s1_A",		
+ "FFPE_MC38_IgG_m14_s1_B",		
+ "FFPE_MC38_IgG_m15_s1_C",		
+ "FFPE_MC38_IgG_m16_s1_D",		
+ "FFPE_MC38_IgG_m9_s1_A",		
+ "FFPE_MC38_aPD1_m17_s1_A",
+ "FFPE_MC38_aPD1_m18_s1_B",		
+ "FFPE_MC38_aPD1_m19_s1_A",		
+ "FFPE_MC38_aPD1_m20_s1_B",		
+ "FFPE_MC38_aPD1_m21_s1_C",		
+ "FFPE_MC38_aPD1_m22_s1_D",		
+ "FFPE_MC38_aPD1_m23_s1_C",		
+ "FFPE_MC38_aPD1_m24_s1_D"
+                    )
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
+
+## Project 7- MC38 aPD1 ST repeat
+project_id <-"P-20221116-0001"
+project_folder <- "10X_ST_Data_2022/PD1_Mouse_cohort/probes/"
+s3_path <- paste0(project_id, "/scRNA-Seq/SPACE-RANGER/mm10-2020-A/")
+s3_subfolders <- c( "FFPE_MC38_IgG_m10_s1_B",		
+ "FFPE_MC38_IgG_m11_s5_C"	,	
+ "FFPE_MC38_IgG_m12_s19_D",		
+ "FFPE_MC38_IgG_m9_s1_A",		
+ "FFPE_MC38_aPD1_m17_s1_A",
+ "FFPE_MC38_aPD1_m18_s1_B",		
+ "FFPE_MC38_aPD1_m21_s1_C",		
+ "FFPE_MC38_aPD1_m22_s1_D"		
+                    )
+extensions <- c("csv", "h5", "html", "jpg", "png", "json", "tsv", "csv", "res")
